@@ -5,13 +5,20 @@
 //  Created by Maurício Costa on 11/01/23.
 //
 
+
 import CoreML
 import SwiftUI
 
 struct ContentView: View {
     @State private var sleepAmount = 8.0
-    @State private var wakeUp = Date.now
+    @State private var wakeUp = defaultWakeTime
     @State private var coffeeAmount = 1
+    static var defaultWakeTime: Date {
+        var components = DateComponents()
+        components.hour = 7
+        components.minute = 0
+        return Calendar.current.date(from: components) ?? Date.now
+    }
     func calculateBedtime() {
         do {
             let config = MLModelConfiguration()
@@ -34,18 +41,19 @@ struct ContentView: View {
     @State private var showingAlert = false
     var body: some View {
         NavigationView {
-            VStack {
-                Text("Quando você quer acordar?").font(.headline)
-                
-                DatePicker("Por favor escolha um horário", selection: $wakeUp, displayedComponents: .hourAndMinute).labelsHidden()
-                
-                Text("Quantidade de sono desejada").font(.headline)
-                
-                Stepper("\(sleepAmount.formatted()) horas", value: $sleepAmount, in: 4...12, step: 0.25)
-                
-                Text("Quantidade diária de café").font(.headline)
-                
-                Stepper(coffeeAmount == 1 ? "1 chícara" : "\(coffeeAmount) chícaras", value: $coffeeAmount, in: 1...20)
+            Form {
+                Section("Quando você quer acordar?") {
+                    DatePicker("Por favor escolha um horário", selection: $wakeUp, displayedComponents: .hourAndMinute).labelsHidden()
+                }
+                Section("Quantidade de sono desejada") {
+                    Stepper("\(sleepAmount.formatted()) horas", value: $sleepAmount, in: 4...12, step: 0.25)
+                }
+                Picker("Quantidade diária de café", selection: $coffeeAmount) {
+                    ForEach(1..<21) {
+                        number in
+                        Text(number == 1 ? "1 chícara" : "\(number) chícaras")
+                    }.pickerStyle(.automatic)
+                }
             }        .toolbar {
                 Button("Calcular", action: calculateBedtime)
         }.alert(alertTitle, isPresented: $showingAlert) {
