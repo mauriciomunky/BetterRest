@@ -9,6 +9,18 @@
 import CoreML
 import SwiftUI
 
+struct Title: ViewModifier {
+    func body(content: Content) -> some View {
+        content.foregroundColor(.blue).font(.title)
+    }
+}
+
+extension View {
+    func titleStyle() -> some View {
+        modifier(Title())
+    }
+}
+
 struct ContentView: View {
     @State private var sleepAmount = 8.0
     @State private var wakeUp = defaultWakeTime
@@ -42,20 +54,23 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("Quando você quer acordar?") {
+                Section {
+                    Text("Quando você quer acordar?").titleStyle()
                     DatePicker("Por favor escolha um horário", selection: $wakeUp, displayedComponents: .hourAndMinute).labelsHidden()
                 }
-                Section("Quantidade de sono desejada") {
+                Section {
+                    Text("Quantidade de sono desejada").titleStyle()
                     Stepper("\(sleepAmount.formatted()) horas", value: $sleepAmount, in: 4...12, step: 0.25)
                 }
-                Picker("Quantidade diária de café", selection: $coffeeAmount) {
+                Text("Quantidade diária de café").titleStyle()
+                Picker("",selection: $coffeeAmount) {
                     ForEach(1..<21) {
                         number in
                         Text(number == 1 ? "1 chícara" : "\(number) chícaras")
                     }.pickerStyle(.automatic)
                 }
             }        .toolbar {
-                Button("Calcular", action: calculateBedtime)
+                Button("Calcular", action: calculateBedtime).titleStyle()
         }.alert(alertTitle, isPresented: $showingAlert) {
             Button("OK") { }
         } message: {
